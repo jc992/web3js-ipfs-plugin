@@ -1,7 +1,7 @@
 {
-  "name": "web3-plugin-template",
+  "name": "web3-ipfs-plugin",
   "version": "1.0.0",
-  "description": "Template plugin to extend web3.js with additional methods",
+  "description": "Plugin for Web3.js library, designed for uploading files to IPFS, storing CIDs in a smart contract, and listing all stored CIDs of given ethereum address",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "homepage": "https://github.com/web3/web3.js-plugin-template#readme",
@@ -11,10 +11,11 @@
   "scripts": {
     "lint": "eslint '{src,test}/**/*.ts'",
     "build": "tsc --project tsconfig.build.json",
-    "test": "jest --config=./test/jest.config.js"
+    "test": "jest --verbose",
+    "test:e2e": "IS_E2E=true jest --verbose"
   },
   "contributors": [
-    "ChainSafe <info@chainsafe.io>"
+    "ffmcgee <joao@chainsafe.io>"
   ],
   "license": "MIT",
   "repository": {
@@ -22,6 +23,15 @@
     "url": "git@github.com:web3/web3.js-plugin-template.git"
   },
   "dependencies": {
+    "@chainsafe/libp2p-noise": "^13.0.3",
+    "@chainsafe/libp2p-yamux": "^5.0.3",
+    "@helia/unixfs": "^1.4.2",
+    "@libp2p/tcp": "^8.0.13",
+    "blockstore-core": "^4.3.4",
+    "datastore-core": "^9.2.3",
+    "dotenv": "^16.3.1",
+    "helia": "^2.1.0",
+    "libp2p": "^0.46.21"
   },
   "devDependencies": {
     "@chainsafe/eslint-config": "^2.0.0",

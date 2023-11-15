@@ -1,34 +1,65 @@
-web3-plugin-template
-===========
+# Web3.js IPFS Plugin
 
-This is a template for creating a repository for web3.js plugin.
+This is a plugin for Web3.js library, designed for uploading files to IPFS, storing CIDs in a smart contract, and listing all stored CIDs of given ethereum address.
 
-How to use
-------------
+## Using the library
 
-1. Create your project out of this template.
+1. Instantiate a Web3 instance and register the plugin
 
-    You can do so by pressing on `Use this template` on the above right corner and then select `Create new Repositor`. Please, use the convention `web3-plugin-<name>` for your repo name.
-2. Update the `name` and `description` fileds at your `package.json`.
+```
+import { Web3 } from "web3";
+import { IpfsPlugin } from "web3-ipfs-plugin";
 
-    Chose a name like: `@<organization>/web3-plugin-<name>` (or the less better `web3-plugin-<name>`).
-3. Update the code inside `src` folder.
+web3 = new Web3("RPC_URL");
+web3.registerPlugin(new IpfsPlugin("RPC_URL"));
+```
 
-4. Modify and add tests inside `test` folder.
+2. Use uploadFile() to upload a file to IPFS network and store the generated CID in a Registry Smart Contract `0xA683BF985BC560c5dc99e8F33f3340d1e53736EB`
 
-5. Publish to the npm registry.
+```
+// Calling this method will upload the file to IPFS, store the CID to a smart contract, and return the transaction receipt (or throws an error if something goes wrong)
+try {
+    const receipt = await web3.ipfs.uploadFile("path/to/file/");
+} catch (e) {
+    // handle error
+}
+```
 
-    You can publish with something like: `yarn build && npm publish --access public`.
+NOTE: If calling from a web browser, the file data should be passed as an Iterable<Uint8Array>, as the 2nd argument (since file path implementation uses `fs` underneath the hood which is only supported on a node environment)
+We suggest using [File System API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API) to implement client-side code capable of fetching and manipulating this data accordingly
 
-Contributing
-------------
+```
+try {
+    const receipt = await web3.ipfs.uploadFile(
+        "this/path/becomes/irrelevant",
+        data
+    );
+} catch (e) {
+    // handle error
+}
+```
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
+3. Use listAllByAddress() to list all encoded CIDs for given Ethereum address (or throws an error if something goes wrong)
 
-Please make sure to update tests as appropriate.
+```
+try {
+    const cidStoredEvents = await web3.ipfs.listAllByAddress("0xb9089c00f17B7c9Cf77f3Fb87164CbD0eC1F7d08");
+} catch(e) {
+    // handle error...
+}
+```
 
-License
--------
+NOTE: A limitation on Web3.js lib makes it so only data from the most recent 50000 blocks can be retrieved
 
-[MIT](https://choosealicense.com/licenses/mit/)
+## Running Tests
+
+1. To run unit tests, run the following command
+   `yarn test`
+
+2. To run end to end tests, run the following command
+   `yarn test:e2e`
+
+NOTE: `/!\` Make sure to add a private key (without the `0x` prefix) to the `P_KEY` environment variable
+as specified from the `.env.sample` file, before running e2e tests.
+If e2e test fails due to insufficient funds in the address you chose to use, just mint some SepoliaETH 
+You can use this [faucet](https://sepolia-faucet.pk910.de/#/) `/!\`

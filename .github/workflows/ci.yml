@@ -1,0 +1,25 @@
+name: Web3.js Ipfs Plugin Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      P_KEY: ${{ secrets.P_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run unit tests
+        run: yarn test
+
+      - name: Run e2e tests
+        run: yarn test:e2e

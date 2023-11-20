@@ -5,6 +5,11 @@ import { UnixFS } from "@helia/unixfs";
  */
 export class IpfsClient {
   private unixFsInstance?: UnixFS;
+  private url: string;
+
+  constructor(ipfsNetworkUrl: string) {
+    this.url = ipfsNetworkUrl;
+  }
 
   /**
    * Uploads local files to IPFS.
@@ -66,7 +71,7 @@ export class IpfsClient {
       const datastore = new MemoryDatastore();
       const libp2p = await createLibp2p({
         addresses: {
-          listen: ["/ip4/0.0.0.0/tcp/0"],
+          listen: [this.url],
         },
         transports: [tcp()],
         connectionEncryption: [noise()],

@@ -10,11 +10,10 @@ export class IpfsPlugin extends Web3PluginBase {
   private web3Client: Web3Client;
   private ipfsClient: IpfsClient;
 
-  constructor(web3: Web3) {
+  constructor(ipfsNetworkUrl: string, web3: Web3) {
     super();
-    // this.wallet()
     this.web3Client = new Web3Client(web3);
-    this.ipfsClient = new IpfsClient();
+    this.ipfsClient = new IpfsClient(ipfsNetworkUrl);
   }
 
   /**

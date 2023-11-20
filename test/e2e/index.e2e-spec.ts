@@ -12,10 +12,13 @@ const DEFAULT_TIMEOUT = 300_000; // we set timeout to 5 minute to allow asynchro
 config();
 
 describe("IpfsPlugin E2E Tests", () => {
+  const ipfsNetworkUrl = "/ip4/0.0.0.0/tcp/0";
   it("should register IpfsPlugin plugin on Web3Context instance", () => {
     const web3Context = new core.Web3Context(RPC_URL);
     const web3Provider = new Web3.providers.HttpProvider(RPC_URL);
-    web3Context.registerPlugin(new IpfsPlugin(new Web3(web3Provider)));
+    web3Context.registerPlugin(
+      new IpfsPlugin(ipfsNetworkUrl, new Web3(web3Provider))
+    );
     expect(web3Context.ipfs).toBeDefined();
   });
 
@@ -27,7 +30,7 @@ describe("IpfsPlugin E2E Tests", () => {
       web3 = new Web3(web3Provider);
       const signer = `0x${process.env.P_KEY ?? ""}`;
       web3.eth.accounts.wallet.add(signer).get(0);
-      web3.registerPlugin(new IpfsPlugin(web3));
+      web3.registerPlugin(new IpfsPlugin(ipfsNetworkUrl, web3));
     });
 
     afterAll(() => jest.clearAllMocks());
@@ -36,7 +39,7 @@ describe("IpfsPlugin E2E Tests", () => {
       const expectedStoredCIDAsHex =
         "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
 
-      it.only(
+      it(
         "should upload data to IPFS network, and generated CID stored to Registry contract on Sepolia Testnet",
         async () => {
           const receipt = await web3.ipfs.uploadFile(

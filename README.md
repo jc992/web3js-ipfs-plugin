@@ -6,17 +6,17 @@ This is a plugin for Web3.js library, designed for uploading files to IPFS, stor
 
 1. Instantiate a Web3 instance and register the plugin
 
-```
+```typescript
 import { Web3 } from "web3";
 import { IpfsPlugin } from "web3-ipfs-plugin";
 
 web3 = new Web3("RPC_URL");
-web3.registerPlugin(new IpfsPlugin("RPC_URL"));
+web3.registerPlugin(new IpfsPlugin(web3));
 ```
 
 2. Use uploadFile() to upload a file to IPFS network and store the generated CID in a Registry Smart Contract `0xA683BF985BC560c5dc99e8F33f3340d1e53736EB`
 
-```
+```typescript
 // Calling this method will upload the file to IPFS, store the CID to a smart contract, and return the transaction receipt (or throws an error if something goes wrong)
 try {
     const receipt = await web3.ipfs.uploadFile("path/to/file/");
@@ -28,7 +28,7 @@ try {
 NOTE: If calling from a web browser, the file data should be passed as an Iterable<Uint8Array>, as the 2nd argument (since file path implementation uses `fs` underneath the hood which is only supported on a node environment)
 We suggest using [File System API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API) to implement client-side code capable of fetching and manipulating this data accordingly
 
-```
+```typescript
 try {
     const receipt = await web3.ipfs.uploadFile(
         "this/path/becomes/irrelevant",
@@ -41,7 +41,7 @@ try {
 
 3. Use listAllByAddress() to list all encoded CIDs for given Ethereum address (or throws an error if something goes wrong)
 
-```
+```typescript
 try {
     const cidStoredEvents = await web3.ipfs.listAllByAddress("0xb9089c00f17B7c9Cf77f3Fb87164CbD0eC1F7d08");
 } catch(e) {

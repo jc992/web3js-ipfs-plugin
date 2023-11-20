@@ -25,9 +25,9 @@ describe("IpfsPlugin E2E Tests", () => {
     beforeAll(() => {
       const web3Provider = new Web3.providers.HttpProvider(RPC_URL);
       web3 = new Web3(web3Provider);
-      web3.registerPlugin(new IpfsPlugin(web3));
       const signer = `0x${process.env.P_KEY ?? ""}`;
       web3.eth.accounts.wallet.add(signer).get(0);
+      web3.registerPlugin(new IpfsPlugin(web3));
     });
 
     afterAll(() => jest.clearAllMocks());
@@ -36,7 +36,7 @@ describe("IpfsPlugin E2E Tests", () => {
       const expectedStoredCIDAsHex =
         "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
 
-      it(
+      it.only(
         "should upload data to IPFS network, and generated CID stored to Registry contract on Sepolia Testnet",
         async () => {
           const receipt = await web3.ipfs.uploadFile(
@@ -47,6 +47,9 @@ describe("IpfsPlugin E2E Tests", () => {
           const log = receipt?.logs[0] as Log;
           const decodedLog = getDecodedLog(web3, log);
 
+          expect(receipt?.from.toLowerCase()).toEqual(
+            String(decodedLog?.owner).toLowerCase()
+          );
           expect(decodedLog?.cid).toEqual(expectedStoredCIDAsHex);
         },
         DEFAULT_TIMEOUT

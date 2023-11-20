@@ -49,8 +49,6 @@ try {
 }
 ```
 
-NOTE: A limitation on Web3.js lib makes it so only data from the most recent 50000 blocks can be retrieved
-
 ## Running Tests
 
 1. To run unit tests, run the following command

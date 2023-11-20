@@ -4,7 +4,7 @@
   "description": "Plugin for Web3.js library, designed for uploading files to IPFS, storing CIDs in a smart contract, and listing all stored CIDs of given ethereum address",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "homepage": "https://github.com/web3/web3.js-plugin-template#readme",
+  "homepage": "https://git@github.com:jc992/web3js-ipfs-plugin",
   "bugs": {
     "url": "https://github.com/web3/web3.js-plugin-template/issues"
   },
@@ -12,15 +12,20 @@
     "lint": "eslint '{src,test}/**/*.ts'",
     "build": "tsc --project tsconfig.build.json",
     "test": "jest --verbose",
-    "test:e2e": "IS_E2E=true jest --verbose"
+    "test:e2e": "IS_E2E=true jest --verbose",
+    "test:browser": "cypress run --headless  --browser chrome"
   },
   "contributors": [
     "ffmcgee <joao@chainsafe.io>"
   ],
+  "browser": {
+    "fs": false,
+    "child_process": false
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:web3/web3.js-plugin-template.git"
+    "url": "git@github.com:jc992/web3js-ipfs-plugin.git"
   },
   "dependencies": {
     "@chainsafe/libp2p-noise": "^13.0.3",
@@ -35,15 +40,25 @@
   },
   "devDependencies": {
     "@chainsafe/eslint-config": "^2.0.0",
+    "@cypress/webpack-preprocessor": "^6.0.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.2.6",
+    "crypto-browserify": "^3.12.0",
+    "cypress": "^13.5.1",
+    "cypress-jest-adapter": "^0.1.1",
     "eslint": "8",
     "jest": "^29.5.0",
     "jest-extended": "^4.0.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "stream-browserify": "^3.0.0",
     "ts-jest": "^29.1.0",
+    "ts-loader": "^9.5.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.3",
-    "web3": "^4.2.2"
+    "web3": "^4.2.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
     "web3": ">= 4.0.3"

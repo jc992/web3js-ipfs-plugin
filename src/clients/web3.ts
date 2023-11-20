@@ -42,7 +42,6 @@ export class Web3Client {
 
   /**
    * List all CIDs for given Ethereum address.
-   * A limitation on Web3.js lib makes it so only data from the most recent 50000 blocks can be retrieved.
    * @param {string} callerAddress public Ethereum address from which to list existing CIDStored events.
    * @returns {(string | EventLog)[]} CIDStored event logs from contract. If an error is thrown, returns an empty array.
    */

@@ -4,7 +4,8 @@ import { REGISTRY_CONTRACT_ABI } from "../utils/constants";
  * An abstraction for encapsulating Web3.js calls.
  */
 export class Web3Client {
-  private readonly BLOCK_NUMBER_THRESHOLD = BigInt(49999);
+  private readonly BLOCK_NUMBER_THRESHOLD = BigInt(50000);
+  private readonly CONTRACT_INCEPTION_BLOCK = BigInt(4546394); // https://sepolia.etherscan.io/tx/0x5d1fca9aff91aad286d468d6556ae50b85bf7d34a8c63d68d294045d85a3da6c
   private readonly REGISTRY_ADDRESS =
     "0xA683BF985BC560c5dc99e8F33f3340d1e53736EB";
   private web3: Web3;
@@ -35,7 +36,7 @@ export class Web3Client {
 
       return transactionReceipt;
     } catch (e) {
-      throw new Error((e as Error).message);
+      throw e as Error;
     }
   }
 
@@ -49,17 +50,46 @@ export class Web3Client {
     callerAddress: string
   ): Promise<(string | EventLog)[]> {
     try {
+      const result: (string | EventLog)[] = [];
       const latestBlock = await this.web3.eth.getBlockNumber();
-      const result = await this.registryContract.getPastEvents("CIDStored", {
-        fromBlock: latestBlock - this.BLOCK_NUMBER_THRESHOLD,
-        toBlock: latestBlock,
-        filter: { owner: callerAddress },
-      });
+      let fromBlock = this.CONTRACT_INCEPTION_BLOCK;
+
+      while (fromBlock <= latestBlock) {
+        const upToBlock = fromBlock + this.BLOCK_NUMBER_THRESHOLD;
+        const toBlock = upToBlock > latestBlock ? latestBlock : upToBlock;
+
+        const pastEvents = await this.getPastEvents(
+          callerAddress,
+          fromBlock,
+          toBlock
+        );
+
+        fromBlock += this.BLOCK_NUMBER_THRESHOLD;
+        result.push(...pastEvents);
+      }
 
       console.log(result); // we print all CIDStored events from contract to the console as per the requirements
       return result;
     } catch (e) {
-      throw new Error((e as Error).message);
+      throw e as Error;
+    }
+  }
+
+  private async getPastEvents(
+    owner: string,
+    fromBlock: bigint,
+    toBlock: bigint
+  ): Promise<(string | EventLog)[]> {
+    try {
+      const result = await this.registryContract.getPastEvents("CIDStored", {
+        fromBlock,
+        toBlock,
+        filter: { owner },
+      });
+
+      return result;
+    } catch (e) {
+      throw e as Error;
     }
   }
 }

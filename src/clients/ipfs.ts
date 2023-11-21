@@ -1,14 +1,27 @@
-import { createReadStream } from "fs";
-import { UnixFS } from "@helia/unixfs";
+import { ThirdwebStorage } from "@thirdweb-dev/storage";
+import { isBrowserEnvironment } from "../utils/functions";
+
+type ThirdWebConfigBase = {
+  secretKey?: string;
+  clientId?: string;
+};
+
+export type ThirdWebConfig = ThirdWebConfigBase &
+  (
+    | { secretKey: string; clientId?: never }
+    | { clientId: string; secretKey?: never }
+  );
+
 /**
  * An abstraction for encapsulating helia IPFS operations.
  */
 export class IpfsClient {
-  private unixFsInstance?: UnixFS;
-  private url: string;
+  private storage: ThirdwebStorage;
 
-  constructor(ipfsNetworkUrl: string) {
-    this.url = ipfsNetworkUrl;
+  constructor({ secretKey, clientId }: ThirdWebConfig) {
+    this.storage = secretKey
+      ? new ThirdwebStorage({ secretKey })
+      : new ThirdwebStorage({ clientId });
   }
 
   /**
@@ -23,71 +36,21 @@ export class IpfsClient {
     data?: Iterable<Uint8Array>
   ): Promise<string> {
     try {
-      if (!this.unixFsInstance) {
-        await this.initUnixFSInstance();
+      let fileBuffer: Buffer;
+      if (!isBrowserEnvironment()) {
+        // we dynamically import "fs" node lib if we are not in a browser environment, so implementation doesn't conflict with
+        // a client calling this from a web browser.
+        const { readFileSync } = await import("fs");
+        fileBuffer = readFileSync(filePath);
+        return await this.storage.upload(fileBuffer);
       }
 
-      const cid = await this.unixFsInstance?.addByteStream(
-        data ?? createReadStream(filePath)
-      );
-      return cid?.toString() ?? "";
+      if (isBrowserEnvironment() && !data)
+        throw new Error("please provide data to be uploaded.");
+
+      return await this.storage.upload(data);
     } catch (e) {
-      const err = e as Error;
-      const msg = `error while uploading file: ${err.message}`;
-      console.error(msg, err.stack);
-      throw new Error(msg);
-    }
-  }
-
-  /**
-   * Spawns a UnixFS instance to be used for uploading files to IPFS. Since this is asynchronous behavior, we cannot do it in the class constructor.
-   */
-  private async initUnixFSInstance(): Promise<void> {
-    try {
-      /**
-       * we do dynamic import in order for e2e tests to run properly, because of an issue with how the library is exposed.
-       * issue: https://github.com/ipfs/helia/issues/149
-       */
-      const [
-        { createHelia },
-        { createLibp2p },
-        { tcp },
-        { noise },
-        { yamux },
-        { MemoryBlockstore },
-        { MemoryDatastore },
-        { unixfs },
-      ] = await Promise.all([
-        import("helia"),
-        import("libp2p"),
-        import("@libp2p/tcp"),
-        import("@chainsafe/libp2p-noise"),
-        import("@chainsafe/libp2p-yamux"),
-        import("blockstore-core"),
-        import("datastore-core"),
-        import("@helia/unixfs"),
-      ]);
-
-      const datastore = new MemoryDatastore();
-      const libp2p = await createLibp2p({
-        addresses: {
-          listen: [this.url],
-        },
-        transports: [tcp()],
-        connectionEncryption: [noise()],
-        streamMuxers: [yamux()],
-        datastore,
-      });
-
-      const helia = await createHelia({
-        libp2p,
-        blockstore: new MemoryBlockstore(),
-        datastore,
-      });
-
-      this.unixFsInstance = unixfs(helia);
-    } catch (e) {
-      console.error("error while initiating ipfs client: ", e);
+      throw e as Error;
     }
   }
 }

@@ -1,5 +1,6 @@
 import Web3, { Contract, EventLog, TransactionReceipt } from "web3";
 import { REGISTRY_CONTRACT_ABI } from "../utils/constants";
+
 /**
  * An abstraction for encapsulating Web3.js calls.
  */
@@ -43,7 +44,7 @@ export class Web3Client {
   /**
    * List all CIDs for given Ethereum address.
    * @param {string} callerAddress public Ethereum address from which to list existing CIDStored events.
-   * @returns {(string | EventLog)[]} CIDStored event logs from contract. If an error is thrown, returns an empty array.
+   * @returns {(string | EventLog)[]} CIDStored event logs from contract. If something goes wrong, an error is thrown.
    */
   public async listCIDsForAddress(
     callerAddress: string
@@ -74,6 +75,13 @@ export class Web3Client {
     }
   }
 
+  /**
+   * List CIDs for given Ethereum address for a certain block range.
+   * @param {string} owner Ethereum address from which to fetch past events.
+   * @param {bigint} fromBlock starting block number for past events.
+   * @param toBlock fromBlock last block number for past events.
+   * @returns {(string | EventLog)[]} CIDStored event logs from contract. If something goes wrong, an error is thrown.
+   */
   private async getPastEvents(
     owner: string,
     fromBlock: bigint,

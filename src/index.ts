@@ -1,6 +1,7 @@
 import Web3, { EventLog, TransactionReceipt, Web3PluginBase } from "web3";
 import { Web3Client } from "./clients/web3";
-import { IpfsClient } from "./clients/ipfs";
+import { IpfsClient, ThirdWebConfig } from "./clients/ipfs";
+
 /**
  * A Web3.js Plugin for uploading a provided local file to IPFS, and storing the CID
  * in a smart contract, as well as listing all stored CIDs of given ethereum address
@@ -10,10 +11,10 @@ export class IpfsPlugin extends Web3PluginBase {
   private web3Client: Web3Client;
   private ipfsClient: IpfsClient;
 
-  constructor(ipfsNetworkUrl: string, web3: Web3) {
+  constructor(web3: Web3, thirdwebConfig: ThirdWebConfig) {
     super();
     this.web3Client = new Web3Client(web3);
-    this.ipfsClient = new IpfsClient(ipfsNetworkUrl);
+    this.ipfsClient = new IpfsClient(thirdwebConfig);
   }
 
   /**

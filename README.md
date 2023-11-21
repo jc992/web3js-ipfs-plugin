@@ -4,24 +4,38 @@ This is a plugin for Web3.js library, designed for uploading files to IPFS, stor
 
 ## Using the library
 
-1. Instantiate a Web3 instance and register the plugin
+1. Create a third web account and api key to use their IPFS network storage service [here](https://thirdweb.com/create-api-key)
+
+2. Declare `thirdWebConfig` object for your plugin to use
+
+```typescript
+// this object should have your third web api secret key if you intend to use the plugin in a node server environment
+const thirdWebConfig = { secretKey: "PLACE_YOUR_SECRET_KEY_HERE"}
+```
+
+```typescript
+// or, if the plugin is to be used in a web browser environment, pass the client id instead
+const thirdWebConfig = { clientId: "PLACE_YOUR_CLIENT_ID_HERE"}
+```
+
+3. Instantiate a Web3 instance and register the plugin
 
 ```typescript
 import { Web3 } from "web3";
 import { IpfsPlugin } from "web3-ipfs-plugin";
 
 web3 = new Web3("RPC_URL");
-web3.registerPlugin(new IpfsPlugin(web3));
+web3.registerPlugin(new IpfsPlugin(web3, thirdWebConfig));
 ```
 
-2. Use uploadFile() to upload a file to IPFS network and store the generated CID in a Registry Smart Contract `0xA683BF985BC560c5dc99e8F33f3340d1e53736EB`
+4. Use uploadFile() to upload a file to IPFS network and store the generated CID in a Registry Smart Contract `0xA683BF985BC560c5dc99e8F33f3340d1e53736EB`
 
 ```typescript
 // Calling this method will upload the file to IPFS, store the CID to a smart contract, and return the transaction receipt (or throws an error if something goes wrong)
 try {
-    const receipt = await web3.ipfs.uploadFile("path/to/file/");
+  const receipt = await web3.ipfs.uploadFile("path/to/file/");
 } catch (e) {
-    // handle error
+  // handle error
 }
 ```
 
@@ -30,22 +44,24 @@ We suggest using [File System API](https://developer.mozilla.org/en-US/docs/Web/
 
 ```typescript
 try {
-    const receipt = await web3.ipfs.uploadFile(
-        "this/path/becomes/irrelevant",
-        data
-    );
+  const receipt = await web3.ipfs.uploadFile(
+    "this/path/becomes/irrelevant",
+    data
+  );
 } catch (e) {
-    // handle error
+  // handle error
 }
 ```
 
-3. Use listAllByAddress() to list all encoded CIDs for given Ethereum address (or throws an error if something goes wrong)
+5. Use listAllByAddress() to list all encoded CIDs for given Ethereum address (or throws an error if something goes wrong)
 
 ```typescript
 try {
-    const cidStoredEvents = await web3.ipfs.listAllByAddress("0xb9089c00f17B7c9Cf77f3Fb87164CbD0eC1F7d08");
-} catch(e) {
-    // handle error...
+  const cidStoredEvents = await web3.ipfs.listAllByAddress(
+    "0xb9089c00f17B7c9Cf77f3Fb87164CbD0eC1F7d08"
+  );
+} catch (e) {
+  // handle error
 }
 ```
 
@@ -57,7 +73,11 @@ try {
 2. To run end to end tests, run the following command
    `yarn test:e2e`
 
+3. To run end to end tests on a web browser environment, run the following command
+   `yarn test:browser`
+
 NOTE: `/!\` Make sure to add a private key (without the `0x` prefix) to the `P_KEY` environment variable
 as specified from the `.env.sample` file, before running e2e tests.
-If e2e test fails due to insufficient funds in the address you chose to use, just mint some SepoliaETH 
+Do the same for your third web configurations, in the `THIRD_WEB_SECRET_KEY` and `THIRD_WEB_CLIENT_ID` environment variables
+If e2e test fails due to insufficient funds in the address you chose to use, just mint some SepoliaETH
 You can use this [faucet](https://sepolia-faucet.pk910.de/#/) `/!\`

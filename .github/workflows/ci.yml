@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       P_KEY: ${{ secrets.P_KEY }}
+      THIRD_WEB_SECRET_KEY: ${{ secrets.THIRD_WEB_SECRET_KEY }}
+      THIRD_WEB_CLIENT_ID: ${{ secrets.THIRD_WEB_CLIENT_ID }}
 
     steps:
       - name: Checkout repository
@@ -23,3 +25,6 @@ jobs:
 
       - name: Run e2e tests
         run: yarn test:e2e
+
+      - name: Run e2e tests in web browser environment
+        run: yarn test:browser

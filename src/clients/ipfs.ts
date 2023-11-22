@@ -6,6 +6,7 @@ type ThirdWebConfigBase = {
   clientId?: string;
 };
 
+// we make it so at least one is mandatory, but client can't ever provide both.
 export type ThirdWebConfig = ThirdWebConfigBase &
   (
     | { secretKey: string; clientId?: never }
@@ -18,10 +19,8 @@ export type ThirdWebConfig = ThirdWebConfigBase &
 export class IpfsClient {
   private storage: ThirdwebStorage;
 
-  constructor({ secretKey, clientId }: ThirdWebConfig) {
-    this.storage = secretKey
-      ? new ThirdwebStorage({ secretKey })
-      : new ThirdwebStorage({ clientId });
+  constructor(config: ThirdWebConfig) {
+    this.storage = new ThirdwebStorage(config);
   }
 
   /**
@@ -36,19 +35,16 @@ export class IpfsClient {
     data?: Iterable<Uint8Array>
   ): Promise<string> {
     try {
-      let fileBuffer: Buffer;
-      if (!isBrowserEnvironment()) {
-        // we dynamically import "fs" node lib if we are not in a browser environment, so implementation doesn't conflict with
-        // a client calling this from a web browser.
-        const { readFileSync } = await import("fs");
-        fileBuffer = readFileSync(filePath);
-        return await this.storage.upload(fileBuffer);
+      if (isBrowserEnvironment()) {
+        if (!data) throw new Error("please provide data to be uploaded.");
+        return await this.storage.upload(data);
       }
 
-      if (isBrowserEnvironment() && !data)
-        throw new Error("please provide data to be uploaded.");
-
-      return await this.storage.upload(data);
+      // we dynamically import "fs" node lib if we are not in a browser environment, so implementation doesn't conflict with
+      // a client calling this from a web browser.
+      const { readFileSync } = await import("fs");
+      const fileBuffer = readFileSync(filePath);
+      return await this.storage.upload(fileBuffer);
     } catch (e) {
       throw e as Error;
     }

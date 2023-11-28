@@ -23,3 +23,5 @@ export const REGISTRY_CONTRACT_ABI = [
 ] as const;
 
 export const RPC_URL: string = "https://ethereum-sepolia.publicnode.com/";
+export const REGISTRY_CONTRACT_ADDRESS: string =
+  "0xA683BF985BC560c5dc99e8F33f3340d1e53736EB";

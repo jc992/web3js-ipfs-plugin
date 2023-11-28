@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
-  build-and-test:
+  install-test-and-build:
     runs-on: ubuntu-latest
     env:
       P_KEY: ${{ secrets.P_KEY }}
@@ -28,3 +29,6 @@ jobs:
 
       - name: Run e2e tests in web browser environment
         run: yarn test:browser
+      
+      - name: Build lib
+        run: yarn build

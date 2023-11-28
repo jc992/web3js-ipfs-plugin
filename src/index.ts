@@ -1,5 +1,5 @@
-import Web3, { EventLog, TransactionReceipt, Web3PluginBase } from "web3";
-import { Web3Client } from "./clients/web3";
+import { EventLog, TransactionReceipt, Web3PluginBase } from "web3";
+import { Web3Client, Web3Config } from "./clients/web3";
 import { IpfsClient, ThirdWebConfig } from "./clients/ipfs";
 
 /**
@@ -11,10 +11,10 @@ export class IpfsPlugin extends Web3PluginBase {
   private web3Client: Web3Client;
   private ipfsClient: IpfsClient;
 
-  constructor(web3: Web3, thirdwebConfig: ThirdWebConfig) {
+  constructor(thirdwebConfig: ThirdWebConfig, web3Config: Web3Config) {
     super();
-    this.web3Client = new Web3Client(web3);
     this.ipfsClient = new IpfsClient(thirdwebConfig);
+    this.web3Client = new Web3Client(web3Config);
   }
 
   /**

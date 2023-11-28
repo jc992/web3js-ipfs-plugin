@@ -5,17 +5,22 @@ import { Web3Client } from "../../src/clients/web3";
 
 describe("IpfsPlugin", () => {
   const mockSecretKey = "mock.secret.key";
-  const mockRpcUrl = "https://mock.rpc.io/";
   const mockPath = "path/to/file/";
   const mockWalletAddress = "0xe8e3c1a9b5f24e1894e905dc8e54de78";
   const mockKeccakCID = "0x807a076c42934c3bbc1fcd1ffea67d00";
   const mockTransactionReceipt = getMockTransactionReceipt();
+  const mockWeb3Config = {
+    context: new Web3("").getContextObject(),
+  };
   let instance: IpfsPlugin;
 
   beforeAll(() => {
-    instance = new IpfsPlugin(new Web3(mockRpcUrl), {
-      secretKey: mockSecretKey,
-    });
+    instance = new IpfsPlugin(
+      {
+        secretKey: mockSecretKey,
+      },
+      mockWeb3Config
+    );
   });
 
   afterAll(() => jest.clearAllMocks());

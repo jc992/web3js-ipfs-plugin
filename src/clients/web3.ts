@@ -1,5 +1,20 @@
-import Web3, { Contract, EventLog, TransactionReceipt } from "web3";
-import { REGISTRY_CONTRACT_ABI } from "../utils/constants";
+import Web3, {
+  Contract,
+  EventLog,
+  TransactionReceipt,
+  Web3APISpec,
+} from "web3";
+import { RegisteredSubscription } from "web3/lib/commonjs/eth.exports";
+import { Web3ContextObject } from "web3-core";
+import {
+  REGISTRY_CONTRACT_ABI,
+  REGISTRY_CONTRACT_ADDRESS,
+} from "../utils/constants";
+
+export type Web3Config = {
+  context: Web3ContextObject<Web3APISpec, RegisteredSubscription>;
+  providerAddress?: string;
+};
 
 /**
  * An abstraction for encapsulating Web3.js calls.
@@ -7,17 +22,17 @@ import { REGISTRY_CONTRACT_ABI } from "../utils/constants";
 export class Web3Client {
   private readonly BLOCK_NUMBER_THRESHOLD = BigInt(50000);
   private readonly CONTRACT_INCEPTION_BLOCK = BigInt(4546394); // https://sepolia.etherscan.io/tx/0x5d1fca9aff91aad286d468d6556ae50b85bf7d34a8c63d68d294045d85a3da6c
-  private readonly REGISTRY_ADDRESS =
-    "0xA683BF985BC560c5dc99e8F33f3340d1e53736EB";
   private web3: Web3;
   private registryContract: Contract<typeof REGISTRY_CONTRACT_ABI>;
+  private providerAddress?: string;
 
-  constructor(web3: Web3) {
-    this.web3 = web3;
-    this.registryContract = new web3.eth.Contract(
+  constructor({ context, providerAddress }: Web3Config) {
+    this.web3 = new Web3(context);
+    this.providerAddress = providerAddress;
+    this.registryContract = new this.web3.eth.Contract(
       REGISTRY_CONTRACT_ABI,
-      this.REGISTRY_ADDRESS,
-      web3.getContextObject()
+      REGISTRY_CONTRACT_ADDRESS,
+      context
     );
   }
 
@@ -28,8 +43,7 @@ export class Web3Client {
    */
   public async storeCID(cid: string): Promise<TransactionReceipt> {
     try {
-      const account = this.web3.eth.wallet?.get(0);
-      const from = account?.address;
+      const from = this.providerAddress;
       const contractCall = this.registryContract.methods.store(cid);
 
       const gas = String(await contractCall.estimateGas({ from }));

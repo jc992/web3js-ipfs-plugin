@@ -22,22 +22,26 @@ describe("IpfsPlugin E2E Tests", () => {
 
   it("should register IpfsPlugin plugin on Web3Context instance", () => {
     const web3Context = new core.Web3Context(RPC_URL);
-    const web3Provider = new Web3.providers.HttpProvider(RPC_URL);
     web3Context.registerPlugin(
-      new IpfsPlugin(new Web3(web3Provider), thirdwebConfig)
+      new IpfsPlugin(thirdwebConfig, { context: web3Context })
     );
     expect(web3Context.ipfs).toBeDefined();
   });
 
   describe("IpfsPlugin method tests", () => {
     let web3: Web3;
+    let providerAddress: string | undefined;
 
     beforeAll(() => {
       const web3Provider = new Web3.providers.HttpProvider(RPC_URL);
       web3 = new Web3(web3Provider);
+
       const signer = `0x${process.env.P_KEY ?? ""}`;
-      web3.eth.accounts.wallet.add(signer).get(0);
-      web3.registerPlugin(new IpfsPlugin(web3, thirdwebConfig));
+      web3.eth.accounts.wallet.add(signer);
+      providerAddress = web3.eth.wallet?.get(0)?.address;
+
+      const web3Config = { context: web3.getContextObject(), providerAddress };
+      web3.registerPlugin(new IpfsPlugin(thirdwebConfig, web3Config));
     });
 
     describe("uploadFile()", () => {
@@ -50,6 +54,9 @@ describe("IpfsPlugin E2E Tests", () => {
           );
 
           expect(receipt).toBeDefined();
+          expect(receipt.from.toLowerCase()).toEqual(
+            String(providerAddress?.toLowerCase())
+          );
         },
         DEFAULT_TIMEOUT
       );
@@ -58,22 +65,26 @@ describe("IpfsPlugin E2E Tests", () => {
     describe("listAllByAddress()", () => {
       const walletAddress = "0xa719ffb8538720010f3473746ad378e80c4c7bba";
 
-      it("owner address property of every log should be the same as the provided wallet address", async () => {
-        const result = await web3.ipfs.listAllByAddress(walletAddress);
+      it(
+        "owner address property of every log should be the same as the provided wallet address",
+        async () => {
+          const result = await web3.ipfs.listAllByAddress(walletAddress);
 
-        // we make sure the result from the call is properly type to later assert all event log owners are the expected address
-        const eventLogs = result
-          .map((log) => (typeof log !== "string" ? log : null))
-          .filter((t) => t);
+          // we make sure the result from the call is properly type to later assert all event log owners are the expected address
+          const eventLogs = result
+            .map((log) => (typeof log !== "string" ? log : null))
+            .filter((t) => t);
 
-        expect(
-          eventLogs.every(
-            (eventLog) =>
-              String(eventLog?.returnValues.owner).toLowerCase() ===
-              walletAddress
-          )
-        );
-      });
+          expect(
+            eventLogs.every(
+              (eventLog) =>
+                String(eventLog?.returnValues.owner).toLowerCase() ===
+                walletAddress
+            )
+          );
+        },
+        DEFAULT_TIMEOUT
+      );
     });
   });
 });

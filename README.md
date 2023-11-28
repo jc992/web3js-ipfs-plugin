@@ -18,14 +18,18 @@ const thirdWebConfig = { secretKey: "PLACE_YOUR_SECRET_KEY_HERE"}
 const thirdWebConfig = { clientId: "PLACE_YOUR_CLIENT_ID_HERE"}
 ```
 
-3. Instantiate a Web3 instance and register the plugin
+3. Use your existing Web3.js instance and register the plugin
 
 ```typescript
 import { Web3 } from "web3";
 import { IpfsPlugin } from "web3-ipfs-plugin";
 
-web3 = new Web3("RPC_URL");
-web3.registerPlugin(new IpfsPlugin(web3, thirdWebConfig));
+// make sure to use library code to sign your main authenticated wallet address, as it will be necessary
+// to pass it as a configuration to later call the registry contact store method
+const providerAddress = web3.eth.wallet?.get(0)?.address;
+const web3Config = { context: web3.getContextObject(), providerAddress };
+
+web3.registerPlugin(new IpfsPlugin(thirdWebConfig, web3Config));
 ```
 
 4. Use uploadFile() to upload a file to IPFS network and store the generated CID in a Registry Smart Contract `0xA683BF985BC560c5dc99e8F33f3340d1e53736EB`

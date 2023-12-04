@@ -28,12 +28,8 @@ export class IpfsPlugin extends Web3PluginBase {
     filePath: string,
     data?: Iterable<Uint8Array>
   ): Promise<TransactionReceipt> {
-    try {
-      const cid = await this.ipfsClient.uploadFile(filePath, data);
-      return await this.web3Client.storeCID(cid);
-    } catch (e) {
-      throw new Error(`something went wrong: ${(e as Error).message}`);
-    }
+    const cid = await this.ipfsClient.uploadFile(filePath, data);
+    return await this.web3Client.storeCID(cid);
   }
 
   /**
@@ -44,13 +40,7 @@ export class IpfsPlugin extends Web3PluginBase {
   public async listAllByAddress(
     address: string
   ): Promise<(string | EventLog)[]> {
-    try {
-      return await this.web3Client.listCIDsForAddress(address);
-    } catch (e) {
-      throw new Error(
-        `failed to fetch CIDs for address ${address}: ${(e as Error).message}`
-      );
-    }
+    return await this.web3Client.listCIDsForAddress(address);
   }
 }
 

@@ -34,19 +34,15 @@ export class IpfsClient {
     filePath: string,
     data?: Iterable<Uint8Array>
   ): Promise<string> {
-    try {
-      if (isBrowserEnvironment()) {
-        if (!data) throw new Error("please provide data to be uploaded.");
-        return await this.storage.upload(data);
-      }
-
-      // we dynamically import "fs" node lib if we are not in a browser environment, so implementation doesn't conflict with
-      // a client calling this from a web browser.
-      const { readFileSync } = await import("fs");
-      const fileBuffer = readFileSync(filePath);
-      return await this.storage.upload(fileBuffer);
-    } catch (e) {
-      throw e as Error;
+    if (isBrowserEnvironment()) {
+      if (!data) throw new Error("please provide data to be uploaded.");
+      return await this.storage.upload(data);
     }
+
+    // we dynamically import "fs" node lib if we are not in a browser environment, so implementation doesn't conflict with
+    // a client calling this from a web browser.
+    const { readFileSync } = await import("fs");
+    const fileBuffer = readFileSync(filePath);
+    return await this.storage.upload(fileBuffer);
   }
 }

@@ -42,17 +42,13 @@ export class Web3Client {
    * @returns {TransactionReceipt} transaction receipt of the transaction that stored CID on Ethereum. If something goes wrong, an error is thrown.
    */
   public async storeCID(cid: string): Promise<TransactionReceipt> {
-    try {
-      const from = this.providerAddress;
-      const contractCall = this.registryContract.methods.store(cid);
+    const from = this.providerAddress;
+    const contractCall = this.registryContract.methods.store(cid);
 
-      const gas = String(await contractCall.estimateGas({ from }));
-      const transactionReceipt = await contractCall.send({ gas, from });
+    const gas = String(await contractCall.estimateGas({ from }));
+    const transactionReceipt = await contractCall.send({ gas, from });
 
-      return transactionReceipt;
-    } catch (e) {
-      throw e as Error;
-    }
+    return transactionReceipt;
   }
 
   /**
@@ -63,30 +59,26 @@ export class Web3Client {
   public async listCIDsForAddress(
     callerAddress: string
   ): Promise<(string | EventLog)[]> {
-    try {
-      const result: (string | EventLog)[] = [];
-      const latestBlock = await this.web3.eth.getBlockNumber();
-      let fromBlock = this.CONTRACT_INCEPTION_BLOCK;
+    const result: (string | EventLog)[] = [];
+    const latestBlock = await this.web3.eth.getBlockNumber();
+    let fromBlock = this.CONTRACT_INCEPTION_BLOCK;
 
-      while (fromBlock <= latestBlock) {
-        const upToBlock = fromBlock + this.BLOCK_NUMBER_THRESHOLD;
-        const toBlock = upToBlock > latestBlock ? latestBlock : upToBlock;
+    while (fromBlock <= latestBlock) {
+      const upToBlock = fromBlock + this.BLOCK_NUMBER_THRESHOLD;
+      const toBlock = upToBlock > latestBlock ? latestBlock : upToBlock;
 
-        const pastEvents = await this.getPastEvents(
-          callerAddress,
-          fromBlock,
-          toBlock
-        );
+      const pastEvents = await this.getPastEvents(
+        callerAddress,
+        fromBlock,
+        toBlock
+      );
 
-        fromBlock += this.BLOCK_NUMBER_THRESHOLD;
-        result.push(...pastEvents);
-      }
-
-      console.log(result); // we print all CIDStored events from contract to the console as per the requirements
-      return result;
-    } catch (e) {
-      throw e as Error;
+      fromBlock += this.BLOCK_NUMBER_THRESHOLD;
+      result.push(...pastEvents);
     }
+
+    console.log(result); // we print all CIDStored events from contract to the console as per the requirements
+    return result;
   }
 
   /**
@@ -101,16 +93,12 @@ export class Web3Client {
     fromBlock: bigint,
     toBlock: bigint
   ): Promise<(string | EventLog)[]> {
-    try {
-      const result = await this.registryContract.getPastEvents("CIDStored", {
-        fromBlock,
-        toBlock,
-        filter: { owner },
-      });
+    const result = await this.registryContract.getPastEvents("CIDStored", {
+      fromBlock,
+      toBlock,
+      filter: { owner },
+    });
 
-      return result;
-    } catch (e) {
-      throw e as Error;
-    }
+    return result;
   }
 }
